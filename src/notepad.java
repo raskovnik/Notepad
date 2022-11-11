@@ -23,10 +23,11 @@ public class notepad extends  JFrame implements ActionListener {
     JMenuItem selectAll;
     JMenuItem zoomIn;
     JMenuItem zoomOut;
+    JTextArea textarea;
 
     notepad() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLayout(new FlowLayout());
+        this.setLayout(null);
         this.setSize(400, 400);
         this.setTitle("Notepad");
 
@@ -50,6 +51,10 @@ public class notepad extends  JFrame implements ActionListener {
         zoomIn = new JMenuItem("Zoom In");
         zoomOut = new JMenuItem("Zoom Out");
         Menu = new JMenuBar();
+        textarea = new JTextArea();
+        textarea.setBounds(0, 0, 400, 400);
+        textarea.setLineWrap(true);
+
 
         file.add(create);
         file.add(open);
@@ -68,6 +73,7 @@ public class notepad extends  JFrame implements ActionListener {
         Menu.add(file);
         Menu.add(edit);
         Menu.add(view);
+        this.add(textarea);
 
         this.setJMenuBar(Menu);
         this.setVisible(true);
@@ -75,7 +81,12 @@ public class notepad extends  JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         System.out.println("meh");
+    }
+
+    public void createNew() {
+        
     }
 
 }
