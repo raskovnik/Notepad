@@ -133,9 +133,13 @@ public class notepad extends  JFrame implements ActionListener {
     }
 
     public void saveAsFile() throws IOException {
+        String name = JOptionPane.showInputDialog("Name this file");
+        if (name == null) {
+            return;
+        }
         notepad newWindow = new notepad();
+        newWindow.docName = name;
         newWindow.textarea.setText(textarea.getText());
-        newWindow.docName = JOptionPane.showInputDialog("Name this file");
         newWindow.chooser = new JFileChooser();
         newWindow.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         newWindow.chooser.showSaveDialog(null);
@@ -184,6 +188,3 @@ public class notepad extends  JFrame implements ActionListener {
         }
     }
 }
-
-
-// TODO: 11/12/22 Fix saveAs such that if no filename is provided, it quits
