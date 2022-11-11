@@ -27,12 +27,14 @@ public class notepad extends  JFrame implements ActionListener {
     JMenuItem zoomIn;
     JMenuItem zoomOut;
     JTextArea textarea;
+    File doc;
+    String docName = doc == null ?"Untitled": doc.getName();
 
     notepad() {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLayout(null);
         this.setSize(400, 400);
-        this.setTitle("Notepad");
+        updateStatus(docName);
 
 
         file = new JMenu("File");
@@ -109,6 +111,9 @@ public class notepad extends  JFrame implements ActionListener {
         }
     }
 
+    public void updateStatus(String docName) {
+        this.setTitle(docName + " - Notepad");
+    }
     public notepad createNew() {
         return new notepad();
     }
@@ -116,18 +121,28 @@ public class notepad extends  JFrame implements ActionListener {
     public void openFile() throws FileNotFoundException {
         JFileChooser chooser = new JFileChooser();
         chooser.showSaveDialog(null);
-        File content;
+//        File content;
         Scanner scanner;
         try {
-            content = new File(chooser.getSelectedFile().getAbsolutePath());
+            doc = new File(chooser.getSelectedFile().getAbsolutePath());
+            docName = doc.getName();
+            updateStatus(docName);
             String s = "";
-            scanner = new Scanner(content);
+            scanner = new Scanner(doc);
             while (scanner.hasNextLine()) {
                 s = s.concat(scanner.nextLine() + "\n");
             }
             textarea.setText(s);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "File not found");
+            JOptionPane.showMessageDialog(this, "File not found or selected");
         }
+    }
+
+    public void saveFile() {
+        System.out.println("Saving file");
+    }
+
+    public void saveAsFile() {
+
     }
 }
