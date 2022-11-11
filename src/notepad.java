@@ -2,6 +2,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class notepad extends  JFrame implements ActionListener {
     JMenuBar Menu;
@@ -26,7 +29,7 @@ public class notepad extends  JFrame implements ActionListener {
     JTextArea textarea;
 
     notepad() {
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLayout(null);
         this.setSize(400, 400);
         this.setTitle("Notepad");
@@ -35,7 +38,7 @@ public class notepad extends  JFrame implements ActionListener {
         file = new JMenu("File");
         edit = new JMenu("Edit");
         view = new JMenu("View");
-        create = new JMenuItem("Create");
+        create = new JMenuItem("New File");
         open = new JMenuItem("Open");
         save = new JMenuItem("Save");
         saveAs = new JMenuItem("Save As");
@@ -55,6 +58,18 @@ public class notepad extends  JFrame implements ActionListener {
         textarea.setBounds(0, 0, 400, 400);
         textarea.setLineWrap(true);
 
+        create.addActionListener(this);
+        open.addActionListener(this);
+        save.addActionListener(this);
+        saveAs.addActionListener(this);
+        share.addActionListener(this);
+        print.addActionListener(this);
+        undo.addActionListener(this);
+        redo.addActionListener(this);
+        cut.addActionListener(this);
+        paste.addActionListener(this);
+        delete.addActionListener(this);
+        selectAll.addActionListener(this);
 
         file.add(create);
         file.add(open);
@@ -81,12 +96,38 @@ public class notepad extends  JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        System.out.println("meh");
+        if (e.getSource() == create) {
+            createNew();
+            System.out.println("Create command");
+        }
+        else if (e.getSource() == open) {
+            try {
+                openFile();
+            } catch (FileNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
-    public void createNew() {
-        
+    public notepad createNew() {
+        return new notepad();
     }
 
+    public void openFile() throws FileNotFoundException {
+        JFileChooser chooser = new JFileChooser();
+        chooser.showSaveDialog(null);
+        File content;
+        Scanner scanner;
+        try {
+            content = new File(chooser.getSelectedFile().getAbsolutePath());
+            String s = "";
+            scanner = new Scanner(content);
+            while (scanner.hasNextLine()) {
+                s = s.concat(scanner.nextLine() + "\n");
+            }
+            textarea.setText(s);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "File not found");
+        }
+    }
 }
