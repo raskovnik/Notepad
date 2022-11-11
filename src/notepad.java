@@ -4,6 +4,8 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class notepad extends  JFrame implements ActionListener {
@@ -29,13 +31,14 @@ public class notepad extends  JFrame implements ActionListener {
     JTextArea textarea;
     File doc;
     String docName = doc == null ?"Untitled": doc.getName();
+    JFileChooser chooser;
+    boolean isSaved = false;
 
     notepad() {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLayout(null);
         this.setSize(400, 400);
         updateStatus(docName);
-
 
         file = new JMenu("File");
         edit = new JMenu("Edit");
@@ -91,37 +94,20 @@ public class notepad extends  JFrame implements ActionListener {
         Menu.add(edit);
         Menu.add(view);
         this.add(textarea);
-
         this.setJMenuBar(Menu);
         this.setVisible(true);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == create) {
-            createNew();
-            System.out.println("Create command");
-        }
-        else if (e.getSource() == open) {
-            try {
-                openFile();
-            } catch (FileNotFoundException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
     public void updateStatus(String docName) {
-        this.setTitle(docName + " - Notepad");
+        this.setTitle(!isSaved? "*"+docName + " - Notepad" :docName + " - Notepad");
     }
     public notepad createNew() {
         return new notepad();
     }
 
     public void openFile() throws FileNotFoundException {
-        JFileChooser chooser = new JFileChooser();
+        chooser = new JFileChooser();
         chooser.showSaveDialog(null);
-//        File content;
         Scanner scanner;
         try {
             doc = new File(chooser.getSelectedFile().getAbsolutePath());
@@ -138,11 +124,66 @@ public class notepad extends  JFrame implements ActionListener {
         }
     }
 
-    public void saveFile() {
-        System.out.println("Saving file");
+    public void saveFile() throws IOException {
+        FileWriter writer = new FileWriter(doc.getAbsolutePath());
+        writer.write(textarea.getText());
+        writer.close();
+        isSaved = true;
+        updateStatus(doc.getAbsolutePath());
     }
 
-    public void saveAsFile() {
+    public void saveAsFile() throws IOException {
+        notepad newWindow = new notepad();
+        newWindow.textarea.setText(textarea.getText());
+        newWindow.docName = JOptionPane.showInputDialog("Name this file");
+        newWindow.chooser = new JFileChooser();
+        newWindow.chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        newWindow.chooser.showSaveDialog(null);
 
+        try {
+            newWindow.doc = new File(chooser.getSelectedFile() + "/" + docName);
+            JOptionPane.showMessageDialog(null, doc.getAbsolutePath());
+
+            if (newWindow.doc.createNewFile()) {
+                FileWriter writer = new FileWriter(newWindow.doc.getAbsolutePath());
+                writer.write(textarea.getText());
+                writer.close();
+                newWindow.updateStatus(newWindow.docName);
+            } else {
+                JOptionPane.showMessageDialog(null, "File already exists");
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error occurred.");
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == create) {
+            createNew();
+            System.out.println("Create command");
+        }
+        else if (e.getSource() == open) {
+            try {
+                openFile();
+            } catch (FileNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else if (e.getSource() == saveAs) {
+            try {
+                saveAsFile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else if (e.getSource() == save) {
+            try {
+                saveFile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 }
+
+
+// TODO: 11/12/22 Fix saveAs such that if no filename is provided, it quits
