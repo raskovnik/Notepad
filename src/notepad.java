@@ -2,6 +2,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.Document;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -36,6 +44,7 @@ public class notepad extends  JFrame implements ActionListener {
 
     notepad() {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.setResizable(false);
         this.setLayout(null);
         this.setSize(400, 400);
         updateStatus(docName);
@@ -75,6 +84,78 @@ public class notepad extends  JFrame implements ActionListener {
         paste.addActionListener(this);
         delete.addActionListener(this);
         selectAll.addActionListener(this);
+
+        KeyStroke undoKeyStroke = KeyStroke.getKeyStroke(
+                KeyEvent.VK_Z, InputEvent.CTRL_MASK);
+        KeyStroke redoKeyStroke = KeyStroke.getKeyStroke(
+                KeyEvent.VK_Y, InputEvent.CTRL_MASK);
+        KeyStroke saveKeyStroke = KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, InputEvent.CTRL_MASK
+        );
+
+        UndoManager undoManager = new UndoManager();
+
+        Document document = textarea.getDocument();
+        document.addUndoableEditListener(new UndoableEditListener() {
+            public void undoableEditHappened(UndoableEditEvent e) {
+                isSaved = false;
+                updateStatus(docName);
+                undoManager.addEdit(e.getEdit());
+            }
+        });
+
+        // Add ActionListeners
+        undo.addActionListener((ActionEvent e) -> {
+            try {
+                undoManager.undo();
+            } catch (CannotUndoException cue) {}
+        });
+        redo.addActionListener((ActionEvent e) -> {
+            try {
+                undoManager.redo();
+            } catch (CannotRedoException cre) {}
+        });
+
+        // Map undo action
+        textarea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(undoKeyStroke, "undoKeyStroke");
+        textarea.getActionMap().put("undoKeyStroke", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    isSaved = false;
+                    updateStatus(docName);
+                    undoManager.undo();
+                } catch (CannotUndoException cue) {}
+            }
+        });
+        // Map redo action
+        textarea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(redoKeyStroke, "redoKeyStroke");
+        textarea.getActionMap().put("redoKeyStroke", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    isSaved = false;
+                    updateStatus(docName);
+                    undoManager.redo();
+                } catch (CannotRedoException cre) {}
+            }
+        });
+
+        textarea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                        .put(saveKeyStroke, "saveKeyStroke");
+
+        textarea.getActionMap().put("saveKeyStroke", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    saveFile();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         file.add(create);
         file.add(open);
@@ -129,7 +210,7 @@ public class notepad extends  JFrame implements ActionListener {
         writer.write(textarea.getText());
         writer.close();
         isSaved = true;
-        updateStatus(doc.getAbsolutePath());
+        updateStatus(docName);
     }
 
     public void saveAsFile() throws IOException {
