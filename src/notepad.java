@@ -99,7 +99,7 @@ public class notepad extends  JFrame implements ActionListener {
         document.addUndoableEditListener(new UndoableEditListener() {
             public void undoableEditHappened(UndoableEditEvent e) {
                 isSaved = false;
-                updateStatus(docName);
+                updateStatus(doc.getName());
                 undoManager.addEdit(e.getEdit());
             }
         });
@@ -206,14 +206,46 @@ public class notepad extends  JFrame implements ActionListener {
     }
 
     public void saveFile() throws IOException {
-        FileWriter writer = new FileWriter(doc.getAbsolutePath());
-        writer.write(textarea.getText());
-        writer.close();
-        isSaved = true;
-        updateStatus(docName);
+        
+        if (docName.equals("Untitled") && doc == null) {
+            String docName = JOptionPane.showInputDialog("Provide a name for the file");
+            if (docName == null) {
+                docName = "Untitled";
+                updateStatus(docName);
+                return;
+            }
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.showSaveDialog(null);
+
+            try {
+                doc = new File(chooser.getSelectedFile() + "/" + docName);
+                if (doc.createNewFile()) {
+                    FileWriter writer = new FileWriter(doc.getAbsolutePath());
+                    writer.write(textarea.getText());
+                    writer.close();
+                    isSaved=true;
+                    updateStatus(doc.getName());
+                } else {
+                    JOptionPane.showMessageDialog(null, "File already exists");
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Error occurred.");
+            }
+
+        }
+        else {
+            FileWriter writer = new FileWriter(doc.getAbsolutePath());
+            writer.write(textarea.getText());
+            writer.close();
+            isSaved = true;
+            updateStatus(docName);
+        }
+
     }
 
     public void saveAsFile() throws IOException {
+        // TODO: 11/12/22  Fix this function 
         String name = JOptionPane.showInputDialog("Name this file");
         if (name == null) {
             return;
@@ -246,7 +278,6 @@ public class notepad extends  JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == create) {
             createNew();
-            System.out.println("Create command");
         }
         else if (e.getSource() == open) {
             try {
