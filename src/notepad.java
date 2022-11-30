@@ -3,8 +3,6 @@ import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -95,12 +93,10 @@ public class notepad extends  JFrame implements ActionListener {
         UndoManager undoManager = new UndoManager();
 
         Document document = textarea.getDocument();
-        document.addUndoableEditListener(new UndoableEditListener() {
-            public void undoableEditHappened(UndoableEditEvent e) {
-                isSaved = false;
-                updateStatus(doc.getName());
-                undoManager.addEdit(e.getEdit());
-            }
+        document.addUndoableEditListener(e -> {
+            isSaved = false;
+            updateStatus(doc.getName());
+            undoManager.addEdit(e.getEdit());
         });
 
         // Add ActionListeners
@@ -207,7 +203,7 @@ public class notepad extends  JFrame implements ActionListener {
     public void saveFile() throws IOException {
         
         if (docName.equals("Untitled") && doc == null) {
-            String docName = JOptionPane.showInputDialog("Provide a name for the file");
+            String docName = JOptionPane.showInputDialog("Provide filename");
             if (docName == null) {
                 docName = "Untitled";
                 updateStatus(docName);
@@ -244,7 +240,7 @@ public class notepad extends  JFrame implements ActionListener {
     }
 
     public void saveAsFile() throws IOException {
-        String name = JOptionPane.showInputDialog("Name this file");
+        String name = JOptionPane.showInputDialog("Input filename");
         if (name == null) {
             return;
         }
