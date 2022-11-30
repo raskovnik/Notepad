@@ -1,4 +1,4 @@
-import java.awt.*;
+import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
@@ -41,6 +41,7 @@ public class notepad extends  JFrame implements ActionListener {
     String docName = doc == null ?"Untitled": doc.getName();
     JFileChooser chooser;
     boolean isSaved = false;
+    Clipboard clipboard = getToolkit().getSystemClipboard();
 
     notepad() {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -80,6 +81,7 @@ public class notepad extends  JFrame implements ActionListener {
         print.addActionListener(this);
         undo.addActionListener(this);
         redo.addActionListener(this);
+        copy.addActionListener(this);
         cut.addActionListener(this);
         paste.addActionListener(this);
         delete.addActionListener(this);
@@ -165,6 +167,7 @@ public class notepad extends  JFrame implements ActionListener {
         file.add(print);
         edit.add(undo);
         edit.add(redo);
+        edit.add(copy);
         edit.add(cut);
         edit.add(paste);
         edit.add(delete);
@@ -274,6 +277,43 @@ public class notepad extends  JFrame implements ActionListener {
         }
     }
 
+    public void copy() {
+        boolean text = textarea.getSelectedText() != null;
+        if (!text)  return;
+        clipboard.setContents(new StringSelection(textarea.getSelectedText()), null);
+    }
+
+    public void paste() throws IOException, UnsupportedFlavorException {
+        boolean text = clipboard.getContents(null) == null;
+        if (text) return;
+        Transferable contents = clipboard.getContents(null);
+        if (contents!=null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            try {
+                textarea.insert((String) contents.getTransferData(DataFlavor.stringFlavor), textarea.getCaretPosition());
+            }
+            catch (UnsupportedFlavorException | IOException ex) {
+                return;
+            }
+
+        }
+    }
+
+    public void cut() {
+        String contents = textarea.getSelectedText();
+        if (contents == null) {
+            return;
+        }
+        clipboard.setContents(new StringSelection(contents), null);
+        textarea.replaceSelection("");
+    }
+
+    public void del() {
+        textarea.replaceSelection("");
+    }
+
+    public void selectA() {
+        textarea.selectAll();
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == create) {
@@ -297,6 +337,20 @@ public class notepad extends  JFrame implements ActionListener {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+        } else if (e.getSource() == copy) {
+            copy();
+        } else if (e.getSource() == paste) {
+            try {
+                paste();
+            } catch (IOException | UnsupportedFlavorException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else if (e.getSource() == cut) {
+            cut();
+        } else if (e.getSource() == delete) {
+            del();
+        } else if (e.getSource() == selectAll) {
+            selectA();
         }
     }
 }
