@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,8 +26,6 @@ public class notepad extends  JFrame implements ActionListener {
     JMenuItem open;
     JMenuItem save;
     JMenuItem saveAs;
-    JMenuItem share;
-    JMenuItem print;
     JMenuItem undo;
     JMenuItem redo;
     JMenuItem cut;
@@ -57,8 +56,6 @@ public class notepad extends  JFrame implements ActionListener {
         open = new JMenuItem("Open");
         save = new JMenuItem("Save");
         saveAs = new JMenuItem("Save As");
-        share = new JMenuItem("Share");
-        print = new JMenuItem("Print");
         undo = new JMenuItem("Undo");
         redo = new JMenuItem("redo");
         cut = new JMenuItem("Cut");
@@ -77,8 +74,6 @@ public class notepad extends  JFrame implements ActionListener {
         open.addActionListener(this);
         save.addActionListener(this);
         saveAs.addActionListener(this);
-        share.addActionListener(this);
-        print.addActionListener(this);
         undo.addActionListener(this);
         redo.addActionListener(this);
         copy.addActionListener(this);
@@ -86,6 +81,8 @@ public class notepad extends  JFrame implements ActionListener {
         paste.addActionListener(this);
         delete.addActionListener(this);
         selectAll.addActionListener(this);
+        zoomIn.addActionListener(this);
+        zoomOut.addActionListener(this);
 
         KeyStroke undoKeyStroke = KeyStroke.getKeyStroke(
                 KeyEvent.VK_Z, InputEvent.CTRL_MASK);
@@ -163,8 +160,6 @@ public class notepad extends  JFrame implements ActionListener {
         file.add(open);
         file.add(save);
         file.add(saveAs);
-        file.add(share);
-        file.add(print);
         edit.add(undo);
         edit.add(redo);
         edit.add(copy);
@@ -314,6 +309,16 @@ public class notepad extends  JFrame implements ActionListener {
     public void selectA() {
         textarea.selectAll();
     }
+
+    public void zoomin() {
+        textarea.setFont(new Font(textarea.getFont().getFontName(), textarea.getFont().getStyle(),
+                textarea.getFont().getSize() + 2));
+    }
+
+    public void zoomout() {
+        textarea.setFont(new Font(textarea.getFont().getFontName(),textarea.getFont().getStyle(),
+                textarea.getFont().getSize() - 2));
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == create) {
@@ -351,6 +356,10 @@ public class notepad extends  JFrame implements ActionListener {
             del();
         } else if (e.getSource() == selectAll) {
             selectA();
+        } else if (e.getSource() == zoomOut) {
+            zoomout();
+        } else if (e.getSource() == zoomIn) {
+            zoomin();
         }
     }
 }
