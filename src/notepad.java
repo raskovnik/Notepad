@@ -124,7 +124,7 @@ public class notepad extends  JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
                 try {
                     isSaved = false;
-                    updateStatus(docName);
+                    updateStatus(doc.getName());
                     undoManager.undo();
                 } catch (CannotUndoException cue) {}
             }
@@ -137,7 +137,7 @@ public class notepad extends  JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
                 try {
                     isSaved = false;
-                    updateStatus(docName);
+                    updateStatus(doc.getName());
                     undoManager.redo();
                 } catch (CannotRedoException cre) {}
             }
@@ -193,13 +193,14 @@ public class notepad extends  JFrame implements ActionListener {
         try {
             doc = new File(chooser.getSelectedFile().getAbsolutePath());
             docName = doc.getName();
-            updateStatus(docName);
             String s = "";
             scanner = new Scanner(doc);
             while (scanner.hasNextLine()) {
                 s = s.concat(scanner.nextLine() + "\n");
             }
             textarea.setText(s);
+            isSaved=true;
+            updateStatus(docName);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "File not found or selected");
         }
@@ -239,13 +240,12 @@ public class notepad extends  JFrame implements ActionListener {
             writer.write(textarea.getText());
             writer.close();
             isSaved = true;
-            updateStatus(docName);
+            updateStatus(doc.getName());
         }
 
     }
 
     public void saveAsFile() throws IOException {
-        // TODO: 11/12/22  Fix this function 
         String name = JOptionPane.showInputDialog("Name this file");
         if (name == null) {
             return;
